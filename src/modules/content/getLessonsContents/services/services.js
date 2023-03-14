@@ -9,7 +9,7 @@ const getLessonContents = async (lessonId) => {
 
         const lessonContents = await LessonsContents.findAll({
             where: { LessonId: lessonId },
-            attributes: ['id', 'content', 'quiz', 'status', 'LessonId'],
+            attributes: ['id', 'code', 'title', 'script', 'content', 'quiz', 'status', 'LessonId'],
         });
 
         return lessonContents;
