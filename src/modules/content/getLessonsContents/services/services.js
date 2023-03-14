@@ -10,6 +10,7 @@ const getLessonContents = async (lessonId) => {
         const lessonContents = await LessonsContents.findAll({
             where: { LessonId: lessonId },
             attributes: ['id', 'code', 'title', 'script', 'content', 'quiz', 'status', 'LessonId'],
+            order: [['code', 'ASC']],
         });
 
         return lessonContents;
@@ -17,6 +18,7 @@ const getLessonContents = async (lessonId) => {
         console.log(error);
     }
 };
+
 
 
 export default getLessonContents;
