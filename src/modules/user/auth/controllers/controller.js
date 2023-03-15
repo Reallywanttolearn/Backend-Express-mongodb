@@ -10,7 +10,6 @@ import {
 dotenv.config();
 
 export const loginUser = asyncHandler(async (req, res) => {
-    console.log(process.env.JWT_SECRET);
     const { email, password } = req.body;
 
     try {
@@ -19,10 +18,6 @@ export const loginUser = asyncHandler(async (req, res) => {
 
         // Generate JWT token with user ID and email as payload
         const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        const decoded = jwt.decode(token);
-
-        console.log(decoded);
         // Save user ID to session
         req.session.userId = user.id;
 

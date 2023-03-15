@@ -8,11 +8,7 @@ dotenv.config();
 const authMiddleware = asyncHandler(async (req, res, next) => {
     // Get the JWT token from the Authorization header
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
     const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.decode(token);
-
-    console.log(decoded);
 
 
     if (!token) {
