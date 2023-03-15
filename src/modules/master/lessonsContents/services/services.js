@@ -30,6 +30,7 @@ export const updateLessonContent = async (id, code, title, script, content, quiz
     }
 };
 
+
 export const deleteLessonContent = async (id) => {
     const numRows = await Lessons.destroy({ where: { id } });
     if (numRows > 0) {

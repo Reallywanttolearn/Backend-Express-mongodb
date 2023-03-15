@@ -19,7 +19,7 @@ const LessonsContents = sequelize.define('LessonsContents', {
         allowNull: false,
     },
     quiz: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSON,
         allowNull: false,
     },
     status: {
