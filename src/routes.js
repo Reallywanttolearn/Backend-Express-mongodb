@@ -7,16 +7,17 @@ import lessonsGroupsMenu from './modules/menu/lessonsGroupsMenu/route.js';
 import contents from './modules/content/getLessonsContents/route.js';
 import auth from '../src/modules/user/auth/route.js';
 import userProgressionRoutes from '../src/modules/user/userProgression/route.js';
+import jwtMiddleware from '../src/modules/user/auth/middleware/middleware.js';
 
 const router = express.Router();
 
-router.use('/courses', courseRoutes);
-router.use('/groups', lessonsGroup);
-router.use('/lessons', lessons);
-router.use('/contents', lessonsContents);
-router.use('/menu', lessonsGroupsMenu);
-router.use('/lessonsContents', contents);
+router.use('/courses', jwtMiddleware, courseRoutes);
+router.use('/groups', jwtMiddleware, lessonsGroup);
+router.use('/lessons', jwtMiddleware, lessons);
+router.use('/contents', jwtMiddleware, lessonsContents);
+router.use('/menu', jwtMiddleware, lessonsGroupsMenu);
+router.use('/lessonsContents', jwtMiddleware, contents);
 router.use('/', auth);
-router.use('/userProgression', userProgressionRoutes);
+router.use('/userProgression', jwtMiddleware, userProgressionRoutes);
 
 export default router;

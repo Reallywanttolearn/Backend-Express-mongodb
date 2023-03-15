@@ -10,14 +10,21 @@ import {
 dotenv.config();
 
 export const loginUser = asyncHandler(async (req, res) => {
+    console.log(process.env.JWT_SECRET);
     const { email, password } = req.body;
 
     try {
         // Call the login service to validate the user credentials
         const user = await login(email, password);
 
-        // Generate JWT token
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Generate JWT token with user ID and email as payload
+        const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        const decoded = jwt.decode(token);
+
+        console.log(decoded);
+        // Save user ID to session
+        req.session.userId = user.id;
 
         // Return the token to the client
         return res.json({ token });
@@ -25,6 +32,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         // Handle any errors that occur during login
         return res.status(401).json({ message: error.message });
     }
+
 });
 
 export const registerUser = asyncHandler(async (req, res) => {
@@ -36,6 +44,9 @@ export const registerUser = asyncHandler(async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Save user ID to session
+        req.session.userId = user.id;
 
         // Return the token to the client
         return res.json({ token });
@@ -52,6 +63,9 @@ export const changePassword = asyncHandler(async (req, res) => {
         // Call the change password service to update the user's password
         await changePasswordUser(userId, oldPassword, newPassword);
 
+        // Save user ID to session
+        req.session.userId = userId;
+
         return res.status(204).end();
     } catch (error) {
         // Handle any errors that occur during password change
@@ -65,6 +79,9 @@ export const deleteUser = asyncHandler(async (req, res) => {
     try {
         // Call the delete user service to remove the user from the database
         await deletedUser(userId);
+
+        // Clear user ID from session
+        req.session.userId = null;
 
         return res.status(204).end();
     } catch (error) {

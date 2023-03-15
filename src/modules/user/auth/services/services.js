@@ -71,3 +71,11 @@ export const deletedUser = async (userId) => {
 
     return user;
 };
+
+export const findUserById = async (userId) => {
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    return user;
+};

@@ -7,24 +7,23 @@ import { defineAssociations } from './src/config/relation.js';
 import { createLogger, format, transports } from "winston";
 import helmet from 'helmet';
 import asyncHandler from 'express-async-handler';
-import 'express-async-errors'; // Import express-async-errors to handle async errors
+import session from 'express-session';
 
 const { combine, timestamp, label, printf } = format;
 
-dotenv.config(); // import env config
-const app = express(); // add express
+dotenv.config();
+const app = express();
 
 (async () => {
     try {
-        await sequelize.sync(); //sync model
-        defineAssociations(); // define relation
+        await sequelize.sync();
+        defineAssociations();
         console.log('Database synced successfully.');
     } catch (error) {
         console.error('Error syncing database:', error);
     }
 })();
 
-// Initialize logger
 const logFormat = printf(({ level, message, label, timestamp }) => {
     return `${timestamp} [${label}] ${level}: ${message}`;
 });
@@ -43,18 +42,20 @@ const logger = createLogger({
     ]
 });
 
-// Middleware for logging
-app.use((req, res, next) => {
-    logger.info(`[${req.method}] ${req.originalUrl}`);
-    next();
-});
-
 app.use(cors());
 app.use(express.json());
-app.use(helmet()); // Add helmet middleware
+app.use(helmet());
+
+// Add session middleware and configure it
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'development' } // Set secure cookie for production environment
+}));
+
 app.use('/api', route);
 
-// Error handling middleware
 app.use((err, req, res, next) => {
     logger.error(err.stack);
     res.status(500).send("Something went wrong.");
@@ -62,7 +63,6 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT;
 
-// Wrap the app.listen() call with asyncHandler
 app.listen(port, asyncHandler(() => {
     console.log(`Server up and running on port ${port}...`);
 }));

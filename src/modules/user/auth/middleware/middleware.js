@@ -1,31 +1,43 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/model.js';
+import asyncHandler from 'express-async-handler';
+import dotenv from "dotenv";
+import { findUserById } from '../services/services.js';
 
-const authMiddleware = async (req, res, next) => {
-    // Get the token from the request headers
-    const token = req.headers.authorization?.split(' ')[1];
+dotenv.config();
+
+const authMiddleware = asyncHandler(async (req, res, next) => {
+    // Get the JWT token from the Authorization header
+    const authHeader = req.headers.authorization;
+    console.log(authHeader);
+    const token = authHeader && authHeader.split(' ')[1];
+    const decoded = jwt.decode(token);
+
+    console.log(decoded);
+
+
     if (!token) {
-        return res.status(401).json({ message: 'Missing token' });
+        return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
     try {
-        // Verify the token using the secret key
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        // Verify the JWT token and decode its payload
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Find the user in the database
-        const user = await User.findByPk(decodedToken.userId);
+        // Get the user from the database using the decoded userId
+        const user = await findUserById(decoded.userId);
+
         if (!user) {
-            return res.status(401).json({ message: 'Invalid token' });
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        // Add the user object to the request object for later use
+        // Set the user object on the request object for use in later middleware functions or route handlers
         req.user = user;
 
-        // Call the next middleware function
         next();
     } catch (error) {
+        console.error(error);
         return res.status(401).json({ message: 'Invalid token' });
     }
-};
+});
 
 export default authMiddleware;
